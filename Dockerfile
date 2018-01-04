@@ -7,6 +7,16 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 ADD . /app
 
+# Set Image Labels
+ARG GIT_COMMIT=unspecified
+LABEL git_commit=$GIT_COMMIT
+
+ARG COMMIT_DATE=unspecified
+LABEL commit_date=$COMMIT_DATE
+
+ARG VERSION=unspecified
+LABEL version=$VERSION 
+
 USER root
 # Install any needed packages specified in requirements.txt
 RUN pip install flask

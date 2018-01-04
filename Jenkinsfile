@@ -12,7 +12,8 @@ node('docker') {
 
             stage "Build image - Package"
                 echo ("Building")
-                def myimage = docker.build 'elastest/ess:0.6.0-beta3'
+                sh 'docker build --build-arg GIT_COMMIT=$(git rev-parse HEAD) --build-arg COMMIT_DATE=$(git log -1 --format=%cd --date=format:%Y-%m-%dT%H:%M:%S) . -t elastest/ess'
+                def myimage = docker.image 'elastest/ess'
 
             stage "Run image"
                 myimage.run()
