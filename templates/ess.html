@@ -11,140 +11,13 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
       <!--Import JQuery-->
       <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/md5.js"></script>	
-      
-      <script>
-		api_version="r3";
-		//Function to send API request with the entered tjob id
-		function addTJobId(){
-			return "/ess/api/"+api_version+"/secjobs/"+$("#tjobid").val()+"/exec";
-		}
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/md5.js"></script>
 
-		function changeProgress(element,percentage){
-			$(element).attr("style", "width: "+percentage+"%");
-		}
-		
-		function hideThisShowThat(hide_pan,show_pan){
-			$(hide_pan).attr("class","collapsible-header");
-			$(show_pan).trigger('click');
-		}
-		function showReport(result_location){
-			url= addTJobId();
-			$.get(url, function(responseTxt, statusTxt, xhr){
-			    if(statusTxt == "success"){
-				for ( var i = 0, l = responseTxt.length; i < l; i++ ) {
-			            
-				    $(result_location).parent().siblings("div.collection").children().next().next().append("<div id=\"insecureurl\" style=\"color:red;\">"+responseTxt[i]+"</div>");
-				}
-				
-			    }
-			    if(statusTxt == "error")
-				alert("Error: " + xhr.status + ": " + xhr.statusText);
-			})
-			
-		}
-//Send SecJob
-		function sendSecJob(){
-			url= "/ess/api/"+api_version+"/secjobs";
-			postbody={id: 0, name: $("#secjobname").val(), vulns:[],tJobId:$("#tjobid").val(),maxRunTimeInMins:10}
-			$.ajax({
-				    type: "POST",
-				    url: url,
-				    // The key needs to match your method's input parameter (case-sensitive).
-				    data: JSON.stringify(postbody),
-				    contentType: "application/json; charset=utf-8",
-				    dataType: "json",
-				    success: function(result){
-						toast("SecJob Created Successfully!",4000);
-						addToSecJobList(result.secjob);
-						
-					      },
-				    failure: function(errMsg) {
-					toast("SecJob Creation Failed! Please check your connection",4000);
-					alert(errMsg);
-				    }
-			});
-	
-		}
-
-		function executeTJob(tjobid){
-			url_start_exec= "/ess/api/"+api_version+"/tjobs/"+tjobid.toString()+"/exec";
-			toast("Starting Executing TJob with id: "+tjobid.toString(),4000);
-			start_exec=$.ajax({
-				    type: "GET",
-				    url: url_start_exec,
-				    // The key needs to match your method's input parameter (case-sensitive).  
-				    dataType: "json",
-				    success: function(result){
-						if(result.result=="IN PROGRESS"){
-						toast("TJob Execution IN PROGRESS!",4000);
-						get_exec_progress=$.ajax({
-				    type: "GET",
-				    url: result.getStat_url,
-				    // The key needs to match your method's input parameter (case-sensitive).  
-				    dataType: "json",
-				    success: function(result1){
-						if(result1.result=="EXECUTING TEST"){
-						toast("TJob Execution state is EXECUTING TEST!",4000);
-						}
-						
-					      },
-				    failure: function(errMsg) {
-					toast("TJob Execution Failed",4000);
-					alert(errMsg);
-				    }
-			});
-				console.log(get_exec_progress)
-						}
-						
-					      },
-				    failure: function(errMsg) {
-					toast("TJob Execution Failed",4000);
-					alert(errMsg);
-				    }
-			});
-			
-				
-			
-		}
-
-		function addToSecJobList(secjob){
-	
-			
-			retreived_secjob="<li id=\"secjob-individual\" class=\"collection-item avatar\" style=\"display: inherit\;\"><i class=\"material-icons circle\">receipt</i><span id=\"secjobid\" class=\"title\">SecJob Id: "+secjob.id+"</span><p id=\"sejobid\">SecJob Name: "+secjob.name+"<br> Associated TJob Id: "+secjob.tJobId+"</p><a href=\"#!\"class=\"secondary-content\"><i id=\"exe-sjob\" class=\"material-icons\">play_arrow</i><p>Execute</p></a></li>";
-			
-			$("#secjob-collection").append(retreived_secjob);
-			$("#exe-sjob").click(function(){
-			      secjobExecStat="<h5 align=\"center\">SecJob Execution</h5><div class=\"collection\"><a href=\"#!\" class=\"collection-item\">TJob Execution Status<div class=\"progress\"><div class=\"determinate\" style=\"width: 0%\"></div></div></a><a href=\"#!\" class=\"collection-item\"> Analyzing Generated HTTP traffic <div class=\"progress\"><div class=\"determinate\" style=\"width: 0%\"></div></div></a><a href=\"#!\" class=\"collection-item\">Insecure URLs </a></div>"
-			      showSecJobExecStat(this,secjobExecStat);
-			      executeTJob(secjob.tJobId,this);
-			  });
-		}
-
-		function showSecJobExecStat(position,exec_stats){
-			
-			
-			$(position).parent().parent().append(exec_stats);
-		}
-		
-
-		//Function that triggers upon clicking tjob creation button
-		$(document).ready(function(){
-		  $("#secjob-collection").hide();
-		  $("#create-sjob").click(function(){
-		      $("#when-empty").hide();
-		      $("#secjob-collection").show();
-		      sendSecJob();
-		  });
-		
-
-		});
-      </script>
+      <script src="scripts.js"></script>
     </head>
     <body>
       <!--Import jQuery before materialize.js-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js">
-      </script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"> </script>
         <!-- LEFT LOGO -->
         <nav>
           <div class="nav-wrapper blue">
@@ -177,7 +50,7 @@
                     <textarea type="text" id="secjobdesc" class="materialize-textarea"></textarea>
                     <label class="active" for="secjobdesc">SecJob Description</label>
                   </div>
-                  <a id="create-sjob" class="btn">Create</a>
+                  <a id="create-sjob" class="btn blue">Create</a>
                 </form>
               </div>
             </li>
@@ -191,7 +64,7 @@
 	    <!-- List SecJobs -->
 		 <p id="when-empty">No SecJobs found</p>
                  <ul id="secjob-collection" class="collection">
-		    
+
 		  </ul>
               </div>
             </li>
@@ -208,12 +81,12 @@
 			<li>2. After entering the SecJob details, click the "Create" button. The SecJob you created now should be visible in the "View and Execute SecJobs" section</li>
 			<li>3. From the "View & Execute SecJobs" section, click the "Execute" button corresponding to the SecJob you created</li>
 			<li>4. The list of the insecure URLs and cookies should now appear</li>
-		</ul> 
+		</ul>
               </div>
             </li>
           </ul>
         </div>
-        
+
         <!-- JQuery Operations -->
         <script type="text/javascript">
           function toast(message,time) {

@@ -33,7 +33,7 @@
     },
     "manifest": {
         "id": "862c9c92-c875-40a6-ad7a-afe3f526bc5d",
-        "manifest_content": "version: '2.1'\nservices:\n   ess:\n      image: elastest/ess:0.5.0\n      networks:\n            - elastest_elastest\n  \nnetworks:\n  elastest_elastest:\n    external: true",
+        "manifest_content": "version: '2.1'\nservices:\n   ess:\n      image: elastest/ess:0.6.0-beta3\n      networks:\n            - elastest_elastest\n  \nnetworks:\n  elastest_elastest:\n    external: true",
         "manifest_type": "docker-compose",
         "plan_id": "cfd3ebd1-5afa-420d-8313-43d681168cf7",
         "service_id": "af7947d9-258b-4dd1-b1ca-17450db25ef7",
@@ -48,7 +48,7 @@
                 },
 		"gui": {
 		    "protocol": "http",
-                    "path": "/templates",
+                    "path": "/gui/",
                     "port": 80
             	}
             }

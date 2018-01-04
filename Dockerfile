@@ -28,12 +28,16 @@ RUN pip install flask-httpauth
 RUN pip install requests
 
 # Make port 80 available to the world outside this container
-EXPOSE 8000
+EXPOSE 80
+
+# Make port 8080 available to the world outside this container
+EXPOSE 8080
 
 #Run ZAP in daemon mode
 RUN chmod +x ./../zap/zap.sh
-CMD python ess.py & ./../zap/zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true &&fg
 
+#Run both ess and ZAP
+CMD ./../zap/zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true & python ess.py &&fg
 
 # Run app.py when the container launches
 #CMD ["python", "ess.py"]
