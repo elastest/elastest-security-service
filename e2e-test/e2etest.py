@@ -7,9 +7,6 @@ import os
 import sys
 import json
 import time
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 #function that calls all other tests
 projectId=0
@@ -77,7 +74,7 @@ def e2etests():
 def test_load_torm_homepage(tormurl,driver):
 		driver.get(tormurl)
 		print(driver.page_source[:30])
-		if(driver.page_source[:30].startswith("<!DOCTYPE html>"))
+		if(driver.page_source[:30].startswith("<!DOCTYPE html>")):
 			print("\ta. TORM home page loaded")
 			return "success"
 		else:
