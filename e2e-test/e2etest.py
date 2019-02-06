@@ -24,19 +24,19 @@ def e2etests():
 	print("TORM URL is: "+tormurl)
 	#List of all the tests to be run. Append to this list the new tests
 	#tests=["test_load_torm_home_preloader(tormurl,driver)","test_load_torm_home_full(tormurl+\"/api/context/services/info\",driver)","test_service_launch(tormurl,driver)","test_create_new_project(tormurl+\"/api/project\",driver)","test_create_new_tjob(tormurl+\"/api/tjob\")","test_run_tjob(tormurl,driver)"]
-	#tests=["test_load_torm_homepage(tormurl,driver)","test_create_exec_tjob(tormurl,driver)"]
-	tests=["test_load_torm_homepage(tormurl,driver)"]
+	tests=["test_load_torm_homepage(tormurl,driver)","test_create_exec_tjob(tormurl,driver)"]
+	#tests=["test_load_torm_homepage(tormurl,driver)"]
 	#setup Chrome WebDriver
 	options = webdriver.ChromeOptions()
 	options.add_argument('headless')
 	options.add_argument('--no-sandbox')
 	capabilities = options.to_capabilities()
 	try:
-		eusUrl=os.environ['ET_EUS_API']	
+		eusUrl=os.environ['ET_EUS_API']
 		print("EUS URL is: "+str(eusUrl))
 		driver = webdriver.Remote(command_executor=eusUrl, desired_capabilities=capabilities)
 	except:
-		print("EUS environment variable could not be read")
+		print("ERROR (Ignorable): EUS environment variable could not be read")
 		driver = webdriver.Chrome(chrome_options=options)
 
 	#driver = webdriver.Firefox() #for testing with GUI locally
@@ -77,12 +77,16 @@ def e2etests():
 def test_load_torm_homepage(tormurl,driver):
 		driver.get(tormurl)
 		print(driver.page_source[:30])
-		return "success"
-
+		if(driver.page_source[:30].startswith("<!DOCTYPE html>"))
+			print("\ta. TORM home page loaded")
+			return "success"
+		else:
+			print("\ta. TORM home page not loaded")
+			return "failed"
 def test_create_exec_tjob(tormurl,driver):
 		time.sleep(4)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="projects"]/div/table/tbody/tr[7]/td[2]/div')
+			element = driver.find_element(By.ID, 'newProjectBtn')
 			element.click()
 			print("\tb. ESS Demo Project Clicked")
 		except:
@@ -90,24 +94,41 @@ def test_create_exec_tjob(tormurl,driver):
 			return "failed"
 		time.sleep(4)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="newTJobBtn"]/span')
+			element = driver.find_element(By.NAME, 'project.name')
+			element.send_keys("ESS Demo Project")
+			print("\tb. ESS Demo Project name entered")
+		except:
+			print("\tERROR: ESS Demo Project name could not be entered")
+			return "failed"
+		time.sleep(4)
+		try:
+			element = driver.find_element(By.XPATH, '//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/app-project-form/div/div/mat-card/mat-card-actions/button[1]')
+			element.send_keys("ESS Demo Project")
+			print("\tc. ESS Demo Project saved")
+		except:
+			print("\tERROR: ESS Demo Project could not be saved")
+			return "failed"
+		time.sleep(4)
+		try:
+			element = driver.find_element(By.ID, 'newTJobBtn')
 			element.click()
 			print("\tc. New TJob Creation Button Clicked")
 		except:
-			print("\tERROR:: New TJob Creation Button Click failed")
+			print("\tERROR: New TJob Creation Button Click failed")
 			return "failed"
 		time.sleep(4)
 
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="md-input-1"]')
+			element = driver.find_element(By.ID, 'md-input-1')
+			element.clear()
 			element.send_keys("ESS Demo TJob")
 			print("\td. ESS Demo TJob Name Set")
 		except:
-			print("\tERROR:: ESS Demo TJob Name Setting Failed")
+			print("\tERROR: ESS Demo TJob Name Setting Failed")
 			return "failed"
 
 		try:
-			element = driver.find_element(By.ID, 'md-input-3')
+			element = driver.find_element(By.ID, 'md-input-2')
 			element.clear()
 			print("\te. ESS Demo TJob Results Path Cleared")
 		except:
@@ -115,16 +136,16 @@ def test_create_exec_tjob(tormurl,driver):
 			return "failed"
 
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="menusideLeft"]/md-sidenav-container/div[4]/div/div/etm-tjob-form/md-card/md-card-content/form/div[1]/div/md-select/div')
+			element = driver.find_element(By.XPATH, '//*[@id="mat-select-0"]/div/div[1]/span')
 			element.click()
-			element = driver.find_element(By.XPATH, '//*[@id="md-option-0"]')
+			element = driver.find_element(By.ID, 'md-option-0')
 			element.click()
 			print("\tf. SuT setting to None")
 		except:
 			print("\tERROR:: SUT setting to None failed")
 			return "failed"
 		try:
-			element = driver.find_element(By.ID, 'md-input-5')
+			element = driver.find_element(By.ID, 'md-input-3')
 			element.clear()
 			print("\tg. ESS Demo TJob Docker Image Cleared")
 		except:
@@ -154,21 +175,21 @@ def test_create_exec_tjob(tormurl,driver):
 			return "failed"
 
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="menusideLeft"]/md-sidenav-container/div[4]/div/div/etm-tjob-form/md-card/md-card-content/form/td-expansion-panel[2]/div[2]/div/div[4]/div/md-checkbox')
+			element = driver.find_element(By.XPATH, '//*[@id="serviceESS"]/label/div')
 			element.click()
 			print("\tk. Set ESS as TSS for the Test Tjob")
 		except:
 			print("\tERROR:: Setting ESS as TSS for the Test Tjob failed")
 			return "failed"
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="menusideLeft"]/md-sidenav-container/div[4]/div/div/etm-tjob-form/md-card/md-card-content/form/td-expansion-panel[2]/div[2]/div/div[5]/div/md-checkbox')
+			element = driver.find_element(By.XPATH, '//*[@id="serviceEUS"]/label/div')
 			element.click()
 			print("\tl. Set EUS as TSS for the Test Tjob")
 		except:
 			print("\tERROR:: Setting EUS as TSS for the Test Tjob failed")
 			return "failed"
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="menusideLeft"]/md-sidenav-container/div[4]/div/div/etm-tjob-form/md-card/md-card-actions/button[1]/span')
+			element = driver.find_element(By.XPATH, '//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/etm-tjob-form/mat-card/mat-card-actions/button[1]/span')
 			element.click()
 			print("\tm. Saved the Test Tjob")
 		except:
@@ -176,7 +197,7 @@ def test_create_exec_tjob(tormurl,driver):
 			return "failed"
 		time.sleep(4)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="tJobs"]/div/table/tbody/tr/td[8]/div/button[1]/span/md-icon')
+			element = driver.find_element(By.XPATH, '//*[@id="tJobs"]/div/table/tbody/tr/td[8]/div/div/button[1]/span/mat-icon')
 			element.click()
 			print("\tn. Launched the Test Tjob")
 		except:
@@ -184,7 +205,7 @@ def test_create_exec_tjob(tormurl,driver):
 			return "failed"
 		time.sleep(4)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="resultMsgText"]')
+			element = driver.find_element(By.ID, 'resultMsgText')
 			printed=True
 			while(element.text!="Executing Test" or element.text!="Failed" or element.text!="Finish"):
 				if(printed==True):
@@ -196,14 +217,14 @@ def test_create_exec_tjob(tormurl,driver):
 			print("\tp. TJob Execution must have finished")
 		time.sleep(4)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="menusideLeft"]/md-sidenav-container/div[4]/div/div/etm-tjob-exec-view/etm-tjob-exec-manager/div/div/md-card/md-card-title/div/a/span[2]')
+			element = driver.find_element(By.XPATH, '//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/etm-tjob-exec-view/etm-tjob-exec-manager/div[1]/div/mat-card/mat-card-title/div/a/span[2]')
 			element.click()
 			print("\tq. Selecting Finished TJob succeeded")
 		except:
 			print("\tERROR: Selecting TJob failed")
 			return "failed"
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="menusideLeft"]/md-sidenav-container/div[4]/div/div/app-tjob-manager/auto-height-grid/normal-height-row/div/md-card/md-card-content/div/span[5]/div/button[3]/span/md-icon')
+			element = driver.find_element(By.XPATH, '//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/etm-tjob-manager/auto-height-grid/normal-height-row/div/mat-card/mat-card-content/div/span[5]/div/button[3]/span/mat-icon')
 			element.click()
 			print("\tr. Clicking Delete Button of Finished TJob Succeeded")
 		except:
@@ -211,46 +232,14 @@ def test_create_exec_tjob(tormurl,driver):
 			return "failed"
 		time.sleep(10)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="cdk-overlay-5"]/md-dialog-container/td-confirm-dialog/td-dialog/div/div[2]/td-dialog-actions/button[2]/span')
+			element = driver.find_element(By.XPATH, '//*[@id="mat-dialog-0"]/td-confirm-dialog/td-dialog/div/div[2]/td-dialog-actions/button[2]/span')
 			element.click()
 			print("\ts. Clicking Delete Confirmation Button Succeeded")
 		except:
 			print("\tERROR: Clicking Delete Confirmation Button Failed")
 			print("Unexpected ignorable error:", sys.exc_info()[0])
 
-		try:
-			element = driver.find_element(By.XPATH, '//*[@id="cdk-overlay-4"]/md-dialog-container/td-confirm-dialog/td-dialog/div/div[2]/td-dialog-actions/button[2]/span')
-			element.click()
-			print("\ts. Clicking Delete Confirmation Button Succeeded")
-		except:
-			print("\tERROR: Clicking Delete Confirmation Button Failed")
-			print("Unexpected ignorable error:", sys.exc_info()[0])
-
-		try:
-			element = driver.find_element(By.XPATH, '//*[@id="cdk-overlay-3"]/md-dialog-container/td-confirm-dialog/td-dialog/div/div[2]/td-dialog-actions/button[2]/span')
-			element.click()
-			print("\ts. Clicking Delete Confirmation Button Succeeded")
-		except:
-			print("\tERROR: Clicking Delete Confirmation Button Failed")
-			print("Unexpected ignorable error:", sys.exc_info()[0])
-
-		try:
-			element = driver.find_element(By.XPATH, '//*[@id="cdk-overlay-2"]/md-dialog-container/td-confirm-dialog/td-dialog/div/div[2]/td-dialog-actions/button[2]/span')
-			element.click()
-			print("\ts. Clicking Delete Confirmation Button Succeeded")
-		except:
-			print("\tERROR: Clicking Delete Confirmation Button Failed")
-			print("Unexpected ignorable error:", sys.exc_info()[0])
-
-		try:
-			element = driver.find_element(By.XPATH, '//*[@id="cdk-overlay-1"]/md-dialog-container/td-confirm-dialog/td-dialog/div/div[2]/td-dialog-actions/button[2]/span')
-			element.click()
-			print("\ts. Clicking Delete Confirmation Button Succeeded")
-		except:
-			print("\tERROR: Clicking Delete Confirmation Button Failed")
-			print("Unexpected ignorable error:", sys.exc_info()[0])
-
-		time.sleep(50)
+		time.sleep(10)
 		return "success"
 
 if __name__=="__main__":
