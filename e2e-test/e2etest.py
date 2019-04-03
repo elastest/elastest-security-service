@@ -230,7 +230,7 @@ def test_create_exec_tjob(tormurl,driver):
 			print("\tERROR: Selecting TJob failed")
 			return "failed"
 		try:
-			element = driver.find_element_by_xpath('//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/etm-tjob-manager/auto-height-grid/normal-height-row/div/mat-card/mat-card-content/div/span[6]/div/button[3]/div[1]')
+			element = driver.find_element_by_xpath('//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/etm-tjob-manager/auto-height-grid/normal-height-row/div/mat-card/mat-card-content/div/span[6]/div/button[3]/span/mat-icon')
 			element.click()
 			print("\tr. Clicking Delete Button of Finished TJob Succeeded")
 		except:
