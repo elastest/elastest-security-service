@@ -145,7 +145,7 @@ def test_create_exec_tjob(tormurl,driver):
 			element = driver.find_element_by_xpath('//*[@id="mat-select-0"]/div/div[2]/div')
 			element.click()
 			print("\tERROR:: SUT setting to None click failed")
-			return "failed"
+			#return "failed"
 		time.sleep(4)
 		try:
 			element = driver.find_element_by_name('tJobImageName')
