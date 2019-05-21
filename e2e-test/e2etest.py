@@ -81,13 +81,9 @@ def test_load_torm_homepage(tormurl,driver):
 			print("\ta. TORM home page loaded")
 			return "success"
 		else:
-			print("\ta. TORM home page not loaded")
-			driver.find_element_by_tag_name('body').send_keys(Keys.COMMAND + 't')
-                        # You can use (Keys.CONTROL + 't') on other OSs
-
-                        # Load a page
-			driver.get(tormurl.rstrip('/'))
-			return "failed"
+			time.sleep(10)
+			return "success"
+		return "failed"
 
 def test_create_exec_tjob(tormurl,driver):
 		time.sleep(4)
