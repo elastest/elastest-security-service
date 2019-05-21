@@ -128,7 +128,7 @@ def test_create_exec_tjob(tormurl,driver):
 		except:
 			print("\tERROR: ESS Demo TJob Name Setting Failed")
 			return "failed"
-
+		time.sleep(4)
 		try:
 			element = driver.find_element_by_name('resultsPath')
 			element.clear()
@@ -136,16 +136,17 @@ def test_create_exec_tjob(tormurl,driver):
 		except:
 			print("\tERROR:: ESS Demo TJob Results Path Clearing failed")
 			return "failed"
-
+		time.sleep(4)
 		try:
 			element = driver.find_element_by_xpath('//*[@id="mat-select-0"]/div/div[1]/span')
 			element.click()
-			element = driver.find_element_by_xpath('//*[@id="mat-option-0"]/span')
-			element.click()
-			print("\tf. SuT setting to None")
+			print("\th. SUT setting to None click succeeded")
 		except:
-			print("\tERROR:: SUT setting to None failed")
+			element = driver.find_element_by_xpath('//*[@id="mat-select-0"]/div/div[2]/div')
+			element.click()
+			print("\tERROR:: SUT setting to None click failed")
 			return "failed"
+		time.sleep(4)
 		try:
 			element = driver.find_element_by_name('tJobImageName')
 			element.clear()
@@ -153,36 +154,47 @@ def test_create_exec_tjob(tormurl,driver):
 		except:
 			print("\tERROR:: ESS Demo TJob Docker Image Clearing failed")
 			return "failed"
-
+		time.sleep(4)
 		try:
 			element.send_keys("dockernash/test-tjob-ess")
 			print("\th. ESS Test TJob Docke Image Set")
 		except:
 			print("\tERROR:: ESS Test TJob Docker Image Setting failed")
 			return "failed"
-
+		time.sleep(4)
 		try:
 			element = driver.find_element_by_xpath('//*[@id="editorInnerContainer0"]/div/div[1]/textarea	')
 			element.clear()
 			print("\ti. ESS Demo TJob Commands Cleared")
 		except:
 			print("\tERROR:: ESS Demo TJob Commands Clearing failed")
-			#return "failed"
-
+			return "failed"
+		time.sleep(4)
 		try:
+			element = driver.find_element_by_xpath('//*[@id="mat-option-0"]/span')
+			element.click()
+			print("\ti.1. Setting SuT to None Succeeded")
+		except:
+			print("\tERROR: Setting SuT to None Failed")
+			return "failed"
+		time.sleep(4)
+		try:
+			element = driver.find_element_by_xpath('//*[@id="editorInnerContainer0"]/div/div[1]/textarea	')
 			element.send_keys("python fteaching-tjob.py example")
 			print("\tj. ESS Test TJob Commands Set")
 		except:
 			print("\tERROR:: ESS Test TJob Commands Setting failed")
 			return "failed"
-
+		time.sleep(4)
 		try:
+			time.sleep(10)
 			element = driver.find_element_by_xpath('//*[@id="serviceESS"]/label/div')
 			element.click()
 			print("\tk. Set ESS as TSS for the Test Tjob")
-		except:
-			print("\tERROR:: Setting ESS as TSS for the Test Tjob failed")
+		except Exception as e:
+			print("\tERROR:: Setting ESS as TSS for the Test Tjob failed because "+ str(e))
 			return "failed"
+		time.sleep(4)
 		try:
 			element = driver.find_element_by_xpath('//*[@id="serviceEUS"]/label/div')
 			element.click()
@@ -190,6 +202,7 @@ def test_create_exec_tjob(tormurl,driver):
 		except:
 			print("\tERROR:: Setting EUS as TSS for the Test Tjob failed")
 			return "failed"
+		time.sleep(4)
 		try:
 			element = driver.find_element_by_xpath('//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/etm-tjob-form/mat-card/mat-card-actions/button[1]')
 			element.click()
@@ -225,6 +238,7 @@ def test_create_exec_tjob(tormurl,driver):
 		except:
 			print("\tERROR: Selecting TJob failed")
 			return "failed"
+		time.sleep(4)
 		try:
 			element = driver.find_element_by_xpath('//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/etm-tjob-manager/auto-height-grid/normal-height-row/div/mat-card/mat-card-content/div/span[6]/div/button[3]/span/mat-icon')
 			element.click()
@@ -240,7 +254,6 @@ def test_create_exec_tjob(tormurl,driver):
 		except:
 			print("\tERROR: Clicking Delete Confirmation Button Failed")
 			print("Unexpected ignorable error:", sys.exc_info()[0])
-
 		time.sleep(10)
 		return "success"
 
