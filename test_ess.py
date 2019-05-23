@@ -24,7 +24,7 @@ class TestESS(unittest.TestCase):
         with ess.app.app_context():
             rv = self.app.get('/gui/scripts.js')
             self.assertTrue("ElasTest ESS GUI JavaScript File" in rv.data)
-    """
+    
     def test_get_scripts(self):
         with ess.app.app_context():
             rv = self.app.get('/scripts.js')
@@ -49,7 +49,7 @@ class TestESS(unittest.TestCase):
         with ess.app.app_context():
             self.assertEqual(ess.isZapReady(),'Ready')
             #self.assertTrue("ZAP is Ready" in rv.data)
-
+    """
     def test_create_dummy_project(self):
         with ess.app.app_context():
             rv = self.app.get('/test/project/')
