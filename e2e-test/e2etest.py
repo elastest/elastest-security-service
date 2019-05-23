@@ -14,6 +14,8 @@ projectId=0
 tjobId=0
 essip=""
 def e2etests():
+	print("E2E tests are starting")
+	print(sys.version)
 	tormurl=sys.argv[1]
 	#To check whether the TORM URL has been read correctly
 	if tormurl[-1]!='/':
@@ -258,4 +260,5 @@ def test_create_exec_tjob(tormurl,driver):
 		return "success"
 
 if __name__=="__main__":
+	print("E2E tests are starting soon..")
 	e2etests()
