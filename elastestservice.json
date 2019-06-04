@@ -54,8 +54,8 @@
                        "path": ""
                     }
                 ],
-        "gui": {
-            "protocol": "http",
+                "gui": {
+                    "protocol": "http",
                     "path": "/gui/",
                     "port": 80
                 }
