@@ -234,7 +234,7 @@ def test_create_exec_tjob(tormurl,driver):
 			print("\tp. TJob Execution must have finished")
 		time.sleep(4)
 		try:
-			element = driver.find_element_by_xpath('//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/etm-tjob-exec-view/etm-tjob-exec-manager/div[1]/div/mat-card/mat-card-title/div/a/span[2]')
+			element = driver.find_element_by_partial_link_text('ESS Demo TJob')
 			element.click()
 			print("\tq. Selecting Finished TJob succeeded")
 		except:
