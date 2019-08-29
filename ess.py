@@ -281,8 +281,8 @@ def stop_ess():
     	os.makedirs(dirname)
     	print("Had to make directory")
     else:
-        write_report_to_path(json.dumps(report), report_path+"zap-report.json")
-        print("ZAP Scan Report has been written to the file "+report_path+"zap-report.json")
+        write_report_to_path(json.dumps(report), report_path+"zap-report.html")
+        print("ZAP Scan Report has been written to the file "+report_path+"zap-report.html")
         #with open(report_path+"cookie-report.json",'w') as f:
         #  f.write(str(get_cookie_sec_report()))
         
