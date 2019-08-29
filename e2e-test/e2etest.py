@@ -214,7 +214,7 @@ def test_create_exec_tjob(tormurl,driver):
 			return "failed"
 		time.sleep(4)
 		try:
-			element = driver.find_element_by_xpath('//*[@id="tJobs"]/div/table/tbody/tr/td[8]/div/div/div[1]/button[1]/span/mat-icon')
+			element = driver.find_element_by_xpath('//*[@id="tJobs"]/div/table/tbody/tr/td[9]/div/div/div[1]/button[1]/span/mat-icon')
 			element.click()
 			print("\tn. Launched the Test Tjob")
 		except:
