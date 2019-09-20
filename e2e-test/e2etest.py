@@ -38,7 +38,8 @@ def e2etests():
 	except:
 		print("ERROR (Ignorable): EUS environment variable could not be read")
 		#driver = webdriver.Chrome()
-		driver = webdriver.Chrome(chrome_options=options)
+		#driver = webdriver.Chrome(chrome_options=options)
+		return 0 #commented out the above steps to avoid prolonged wait
 
 	#driver = webdriver.Firefox() #for testing with GUI locally
 	#driver = webdriver.Chrome(chrome_options=options)
