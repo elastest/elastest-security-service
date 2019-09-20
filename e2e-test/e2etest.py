@@ -234,7 +234,7 @@ def test_create_exec_tjob(tormurl,driver):
 					continue
 		except:
 			print("\tp. TJob Execution must have finished")
-		time.sleep(4)
+		time.sleep(12)
 		try:
 			element = driver.find_element_by_partial_link_text('ESS Demo TJob')
 			element.click()
