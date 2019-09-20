@@ -1,6 +1,7 @@
 ##############################
 # Author: Avinash Sudhodanan #
 ##############################
+from datetime import datetime
 from selenium import webdriver
 import pprint
 import os
@@ -261,5 +262,10 @@ def test_create_exec_tjob(tormurl,driver):
 		return "success"
 
 if __name__=="__main__":
+	now = datetime.now()
+	print("Start Test Time =", now)
 	print("E2E tests are starting soon..")
 	e2etests()
+	# datetime object containing current date and time
+	now = datetime.now()
+	print("End Test Time =", now)
