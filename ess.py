@@ -48,7 +48,7 @@ def unauthorized():
 
 #To be used while implementing HTTPBasicAuth
 @app.errorhandler(400)
-def not_found(error):
+def bad_req(error):
     return make_response(jsonify( { 'error': 'Bad request' } ), 400)
 
 #To be used while implementing HTTPBasicAuth
@@ -80,7 +80,7 @@ def load_gui():
 @app.route('/health/', methods = ['GET'])
 def get_health():
 	try:
-		urls=zap.core.urls
+		urls = zap.core.urls
 		return jsonify( {'status': "up", "context": {"message":"ZAP is Ready"}})
 	except ProxyError:
 		return jsonify( {'status': "down", "context": {"message":"ZAP is not Ready"}})
@@ -117,6 +117,102 @@ def start_scan():
     else:
             return jsonify({'status': "ZAP Exception"})
 
+#Function containing all sec report generation logic
+def write_report_to_path(report_unsorted, new_path):
+    report_unsorted = [{"attack": "", "confidence": "Medium", "wascid": "13", "description": "The cache-control and pragma HTTP header have not been set properly or are missing allowing the browser and proxies to cache content.", "reference": "https://www.owasp.org/index.php/Session_Management_Cheat_Sheet#Web_Content_Caching", "sourceid": "3", "solution": "Whenever possible ensure the cache-control HTTP header is set with no-cache, no-store, must-revalidate; and that the pragma HTTP header is set with no-cache.", "param": "Cache-Control", "method": "GET", "url": "https://www.gstatic.com/chrome/intelligence/assist/ranker/models/translate/2017/03/translate_ranker_model_20170329.pb.bin", "pluginId": "10015", "other": "", "alert": "Incomplete or No Cache-control and Pragma HTTP Header Set", "messageId": "3", "id": "0", "evidence": "public, max-age=31536000", "cweid": "525", "risk": "Medium", "name": "Incomplete or No Cache-control and Pragma HTTP Header Set"}, {"attack": "", "confidence": "Medium", "wascid": "14", "description": "Web Browser XSS Protection is not enabled, or is disabled by the configuration of the 'X-XSS-Protection' HTTP response header on the web server", "reference": "https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet\nhttps://blog.veracode.com/2014/03/guidelines-for-setting-security-headers/", "sourceid": "3", "solution": "Ensure that the web browser's XSS filter is enabled, by setting the X-XSS-Protection HTTP response header to '1'.", "param": "X-XSS-Protection", "method": "GET", "url": "https://www.gstatic.com/chrome/intelligence/assist/ranker/models/translate/2017/03/translate_ranker_model_20170329.pb.bin", "pluginId": "10016", "other": "The X-XSS-Protection HTTP response header allows the web server to enable or disable the web browser's XSS protection mechanism. The following values would attempt to enable it: \nX-XSS-Protection: 1; mode=block\nX-XSS-Protection: 1; report=http://www.example.com/xss\nThe following values would disable it:\nX-XSS-Protection: 0\nThe X-XSS-Protection HTTP response header is currently supported on Internet Explorer, Chrome and Safari (WebKit).\nNote that this alert is only raised if the response body could potentially contain an XSS payload (with a text-based content type, with a non-zero length).", "alert": "Web Browser XSS Protection Not Enabled", "messageId": "3", "id": "1", "evidence": "X-XSS-Protection: 0", "cweid": "933", "risk": "High", "name": "Web Browser XSS Protection Not Enabled"}, {"attack": "", "confidence": "Medium", "wascid": "15", "description": "X-Frame-Options header is not included in the HTTP response to protect against 'ClickJacking' attacks.", "reference": "http://blogs.msdn.com/b/ieinternals/archive/2010/03/30/combating-clickjacking-with-x-frame-options.aspx", "sourceid": "3", "solution": "Most modern Web browsers support the X-Frame-Options HTTP header. Ensure it's set on all web pages returned by your site (if you expect the page to be framed only by pages on your server (e.g. it's part of a FRAMESET) then you'll want to use SAMEORIGIN, otherwise if you never expect the page to be framed, you should use DENY. ALLOW-FROM allows specific websites to frame the web page in supported web browsers).", "param": "X-Frame-Options", "method": "GET", "url": "https://www.gstatic.com/chrome/intelligence/assist/ranker/models/translate/2017/03/translate_ranker_model_20170329.pb.bin", "pluginId": "10020", "other": "", "alert": "X-Frame-Options Header Not Set", "messageId": "3", "id": "2", "evidence": "", "cweid": "16", "risk": "Medium", "name": "X-Frame-Options Header Not Set"}, {"attack": "", "confidence": "Medium", "wascid": "13", "description": "The cache-control and pragma HTTP header have not been set properly or are missing allowing the browser and proxies to cache content.", "reference": "https://www.owasp.org/index.php/Session_Management_Cheat_Sheet#Web_Content_Caching", "sourceid": "3", "solution": "Whenever possible ensure the cache-control HTTP header is set with no-cache, no-store, must-revalidate; and that the pragma HTTP header is set with no-cache.", "param": "Cache-Control", "method": "GET", "url": "https://www.example.org/", "pluginId": "10015", "other": "", "alert": "Incomplete or No Cache-control and Pragma HTTP Header Set", "messageId": "13", "id": "3", "evidence": "max-age=604800", "cweid": "525", "risk": "Low", "name": "Incomplete or No Cache-control and Pragma HTTP Header Set"}, {"attack": "", "confidence": "Medium", "wascid": "14", "description": "Web Browser XSS Protection is not enabled, or is disabled by the configuration of the 'X-XSS-Protection' HTTP response header on the web server", "reference": "https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet\nhttps://blog.veracode.com/2014/03/guidelines-for-setting-security-headers/", "sourceid": "3", "solution": "Ensure that the web browser's XSS filter is enabled, by setting the X-XSS-Protection HTTP response header to '1'.", "param": "X-XSS-Protection", "method": "GET", "url": "https://www.example.org/", "pluginId": "10016", "other": "The X-XSS-Protection HTTP response header allows the web server to enable or disable the web browser's XSS protection mechanism. The following values would attempt to enable it: \nX-XSS-Protection: 1; mode=block\nX-XSS-Protection: 1; report=http://www.example.com/xss\nThe following values would disable it:\nX-XSS-Protection: 0\nThe X-XSS-Protection HTTP response header is currently supported on Internet Explorer, Chrome and Safari (WebKit).\nNote that this alert is only raised if the response body could potentially contain an XSS payload (with a text-based content type, with a non-zero length).", "alert": "Web Browser XSS Protection Not Enabled", "messageId": "13", "id": "4", "evidence": "", "cweid": "933", "risk": "Low", "name": "Web Browser XSS Protection Not Enabled"}, {"attack": "", "confidence": "Medium", "wascid": "15", "description": "The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.", "reference": "http://msdn.microsoft.com/en-us/library/ie/gg622941%28v=vs.85%29.aspx\nhttps://www.owasp.org/index.php/List_of_useful_HTTP_headers", "sourceid": "3", "solution": "Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages.\nIf possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.", "param": "X-Content-Type-Options", "method": "GET", "url": "https://www.example.org/", "pluginId": "10021", "other": "This issue still applies to error type pages (401, 403, 500, etc) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scanner will not alert on client or server error responses.", "alert": "X-Content-Type-Options Header Missing", "messageId": "13", "id": "5", "evidence": "", "cweid": "16", "risk": "Low", "name": "X-Content-Type-Options Header Missing"}, {"attack": "", "confidence": "Medium", "wascid": "15", "description": "X-Frame-Options header is not included in the HTTP response to protect against 'ClickJacking' attacks.", "reference": "http://blogs.msdn.com/b/ieinternals/archive/2010/03/30/combating-clickjacking-with-x-frame-options.aspx", "sourceid": "3", "solution": "Most modern Web browsers support the X-Frame-Options HTTP header. Ensure it's set on all web pages returned by your site (if you expect the page to be framed only by pages on your server (e.g. it's part of a FRAMESET) then you'll want to use SAMEORIGIN, otherwise if you never expect the page to be framed, you should use DENY. ALLOW-FROM allows specific websites to frame the web page in supported web browsers).", "param": "X-Frame-Options", "method": "GET", "url": "https://www.example.org/", "pluginId": "10020", "other": "", "alert": "X-Frame-Options Header Not Set", "messageId": "13", "id": "6", "evidence": "", "cweid": "16", "risk": "Medium", "name": "X-Frame-Options Header Not Set"}]
+    report = []
+    for entry in report_unsorted:
+        if entry["risk"] == "High":
+            report.append(entry)
+    for entry in report_unsorted:
+        if entry["risk"] == "Medium":
+            report.append(entry)
+    for entry in report_unsorted:
+        if entry["risk"] == "Low":
+            report.append(entry)
+    
+    url_key_report = {}
+    for entry in report:
+        if(entry["url"] not in list(url_key_report.keys())):
+            url_key_report[entry["url"]] = [entry]
+        else:
+            url_key_report[entry["url"]].append(entry)
+
+    part_1 = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <title>ESS Scan Report</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-alpha.4/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script type = "text/javascript" src = "https://code.jquery.com/jquery-2.1.1.min.js"></script>           
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-alpha.4/js/materialize.min.js"></script>
+    </head>
+
+    <body>
+    <!-- LEFT LOGO -->
+    <nav>
+        <div class="nav-wrapper grey darken-1">
+            <a href="" class="brand-logo">ElasTest Security Service (ESS)</a>
+        </div>
+    </nav>
+    <div class="container">
+    <h5>ESS Security Scan Report</h5>
+    <ul class="collapsible">
+    """
+    reports = ""
+    count = 0
+    for site in list(url_key_report.keys()):
+        site_name_begin = """
+            <li>
+                <div class="collapsible-header"><i class="material-icons">bug_report</i>"""+site+"</div>"
+        each_alert = ""
+        for alert in url_key_report[site]:
+            if alert["risk"] == "High":
+                color = "red-text"
+            elif alert["risk"] == "Medium":
+                color = "orange-text"
+            else:
+                color = ""
+            count+=1
+            alerts_begin = """<div class="collapsible-body">"""
+            collapsible_begin = "<ul class=\"collapsible\">"
+            each_alert_entry = ""
+            for key in list(alert.keys()):
+                if len(str(alert[key])) != 0:
+                    each_alert_entry += "<p>" + "<b>" + str(key) + ": " + "</b>" + str(alert[key]) + "</p></br>"
+            each_alert += """
+                <li>
+                <div class="collapsible-header"><i class="material-icons """+color+"""\">lens</i>Alert """+str(count)+"""</div>
+                <div class = "collapsible-body"><span>"""+each_alert_entry+"""</span></div>
+                </li>"""
+        count = 0
+        collapsible_end = "</ul>"
+        alerts_end  = "</div>"
+        site_name_end =     """
+            </li>
+        """
+        reports += site_name_begin + alerts_begin + collapsible_begin + each_alert + collapsible_end + alerts_end + site_name_end
+    end = """
+    </ul>
+    </div>
+    """
+    part_2 = """
+    <script>
+    $(document).ready(function(){
+        $('.collapsible').collapsible();
+    });
+
+    $(document).click(function(){
+        $('.collapsible').collapsible();
+    });
+    </script>
+    </body>   
+    </html>
+    """
+    new_days = open(new_path,'w')
+    new_days.write(part_1+reports+end+part_2)
+    new_days.close()
 
 #Function containing all cookie security logic
 def get_cookie_sec_report():
@@ -197,11 +293,11 @@ def stop_ess():
     	os.makedirs(dirname)
     	print("Had to make directory")
     else:
-        with open(report_path+"zap-report.json",'w') as f:
-   		       f.write(json.dumps(report))
-        print("ZAP Scan Report has been written to the file "+report_path+"zap-report.json")
-        with open(report_path+"cookie-report.json",'w') as f:
-            f.write(str(get_cookie_sec_report()))
+        write_report_to_path(json.dumps(report), report_path+"zap-report.html")
+        print("ZAP Scan Report has been written to the file "+report_path+"zap-report.html")
+        #with open(report_path+"cookie-report.json",'w') as f:
+        #  f.write(str(get_cookie_sec_report()))
+        
         print("Cookie security report has been written to the file "+report_path+"cookie-report.json")
 
     return jsonify( { 'status': "stopped-ess" } )
