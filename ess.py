@@ -15,6 +15,7 @@ import os
 import requests
 import json
 from requests.exceptions import ProxyError
+import datetime
 
 torm_api="etm:8091" #TORM API URL in production mode
 #torm_api="localhost:37000" #TORM API URL in dev mode
@@ -29,6 +30,9 @@ ess_called=0
 ess_finished=0
 scans=[] #setting empty secjobs list when api starts
 sites_to_be_scanned=[]
+time_at_scan = None
+time_after_10_min = None
+
 #To be used while implementing HTTPBasicAuth
 @auth.get_password
 def get_password(username):
@@ -94,8 +98,12 @@ def get_tjob_stat():
 @app.route('/ess/api/'+api_version+'/status/', methods = ['GET'])
 def get_ess_stat():
         global ess_finished
+        current_time = datetime.datetime.now()
+        time_10_min_after_ess_scan = time_at_scan +  datetime.timedelta(minutes = 10)
         if ess_finished==1:
             return jsonify({'status': "finished"})
+        elif (current_time >= time_10_min_after_ess_scan):
+            return jsonify({'status': "scan-timelimit-exceeded"})
         else:
             return jsonify({'status': "not-yet"})
 
@@ -165,6 +173,10 @@ def get_cookie_sec_report():
 def call_ess():
     global ess_called
     global sites_to_be_scanned
+    #Start measuring time to avoid ESS run forever
+    global time_at_scan
+    time_at_scan = datetime.datetime.now()
+
     ess_called=1
     if "sites" in request.json.keys() and request.json['sites']!=[]:
             sites_to_be_scanned=request.json['sites']

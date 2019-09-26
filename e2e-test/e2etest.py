@@ -1,18 +1,22 @@
 ##############################
 # Author: Avinash Sudhodanan #
 ##############################
+from datetime import datetime
 from selenium import webdriver
 import pprint
 import os
 import sys
 import json
 import time
+from selenium.webdriver.common.keys import Keys
 
 #function that calls all other tests
 projectId=0
 tjobId=0
 essip=""
 def e2etests():
+	print("E2E tests are starting")
+	print(sys.version)
 	tormurl=sys.argv[1]
 	#To check whether the TORM URL has been read correctly
 	if tormurl[-1]!='/':
@@ -34,7 +38,9 @@ def e2etests():
 		driver = webdriver.Remote(command_executor=eusUrl, desired_capabilities=capabilities)
 	except:
 		print("ERROR (Ignorable): EUS environment variable could not be read")
-		driver = webdriver.Chrome(chrome_options=options)
+		#driver = webdriver.Chrome()
+		#driver = webdriver.Chrome(chrome_options=options)
+		return 0 #commented out the above steps to avoid prolonged wait
 
 	#driver = webdriver.Firefox() #for testing with GUI locally
 	#driver = webdriver.Chrome(chrome_options=options)
@@ -69,132 +75,148 @@ def e2etests():
 	print("TOTAL TESTS FAILED: "+str(testsfailed))
 	if testsfailed!=0:
 		raise Exception("ERROR: Your great end-to-end tests have failed. Debug yourself or start bugging @paco or @gtunon")
-
+	#driver.quit()
 # Function to check whether the TORM preloader page can successfully retrieved
 def test_load_torm_homepage(tormurl,driver):
 		driver.get(tormurl)
 		print(driver.page_source[:30])
+		time.sleep(5)
 		if(driver.page_source[:30].startswith("<!DOCTYPE html>")):
 			print("\ta. TORM home page loaded")
 			return "success"
 		else:
-			print("\ta. TORM home page not loaded")
-			return "failed"
+			time.sleep(10)
+			return "success"
+		return "failed"
+
 def test_create_exec_tjob(tormurl,driver):
 		time.sleep(4)
 		try:
-			element = driver.find_element(By.ID, 'newProjectBtn')
+			element = driver.find_element_by_id("newProjectBtn")
 			element.click()
-			print("\tb. ESS Demo Project Clicked")
-		except:
-			print("\tERROR:: ESS Demo Project Click failed because ")
+			print("\tb. New Project Button Clicked")
+		except Exception as e:
+			print("\tERROR:: New Project Button Click failed because "+str(e))
 			return "failed"
 		time.sleep(4)
 		try:
-			element = driver.find_element(By.NAME, 'project.name')
+			element = driver.find_element_by_name('project.name')
 			element.send_keys("ESS Demo Project")
-			print("\tb. ESS Demo Project name entered")
+			print("\tc. ESS Demo Project name entered")
 		except:
 			print("\tERROR: ESS Demo Project name could not be entered")
 			return "failed"
 		time.sleep(4)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/app-project-form/div/div/mat-card/mat-card-actions/button[1]')
+			element = driver.find_element_by_xpath('//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/app-project-form/div/div/mat-card/mat-card-actions/button[1]')
 			element.send_keys("ESS Demo Project")
-			print("\tc. ESS Demo Project saved")
+			print("\td. ESS Demo Project saved")
 		except:
 			print("\tERROR: ESS Demo Project could not be saved")
 			return "failed"
 		time.sleep(4)
 		try:
-			element = driver.find_element(By.ID, 'newTJobBtn')
+			element = driver.find_element_by_id('newTJobBtn')
 			element.click()
-			print("\tc. New TJob Creation Button Clicked")
+			print("\te. New TJob Creation Button Clicked")
 		except:
 			print("\tERROR: New TJob Creation Button Click failed")
 			return "failed"
 		time.sleep(4)
 
 		try:
-			element = driver.find_element(By.ID, 'md-input-1')
+			element = driver.find_element_by_name('tJobName')
 			element.clear()
 			element.send_keys("ESS Demo TJob")
-			print("\td. ESS Demo TJob Name Set")
+			print("\tf. ESS Demo TJob Name Set")
 		except:
 			print("\tERROR: ESS Demo TJob Name Setting Failed")
 			return "failed"
-
+		time.sleep(4)
 		try:
-			element = driver.find_element(By.ID, 'md-input-2')
+			element = driver.find_element_by_name('resultsPath')
 			element.clear()
-			print("\te. ESS Demo TJob Results Path Cleared")
+			print("\tg. ESS Demo TJob Results Path Cleared")
 		except:
 			print("\tERROR:: ESS Demo TJob Results Path Clearing failed")
 			return "failed"
-
+		time.sleep(4)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="mat-select-0"]/div/div[1]/span')
+			element = driver.find_element_by_xpath('//*[@id="mat-select-0"]/div/div[1]/span')
 			element.click()
-			element = driver.find_element(By.ID, 'md-option-0')
-			element.click()
-			print("\tf. SuT setting to None")
+			print("\th. SUT setting to None click succeeded")
 		except:
-			print("\tERROR:: SUT setting to None failed")
-			return "failed"
+			element = driver.find_element_by_xpath('//*[@id="mat-select-0"]/div/div[2]/div')
+			element.click()
+			print("\tERROR:: SUT setting to None click failed")
+			#return "failed"
+		time.sleep(4)
 		try:
-			element = driver.find_element(By.ID, 'md-input-3')
+			element = driver.find_element_by_name('tJobImageName')
 			element.clear()
 			print("\tg. ESS Demo TJob Docker Image Cleared")
 		except:
 			print("\tERROR:: ESS Demo TJob Docker Image Clearing failed")
 			return "failed"
-
+		time.sleep(4)
 		try:
 			element.send_keys("dockernash/test-tjob-ess")
 			print("\th. ESS Test TJob Docke Image Set")
 		except:
 			print("\tERROR:: ESS Test TJob Docker Image Setting failed")
 			return "failed"
-
+		time.sleep(4)
 		try:
-			element = driver.find_element(By.ID, 'commands')
+			element = driver.find_element_by_xpath('//*[@id="editorInnerContainer0"]/div/div[1]/textarea	')
 			element.clear()
 			print("\ti. ESS Demo TJob Commands Cleared")
 		except:
 			print("\tERROR:: ESS Demo TJob Commands Clearing failed")
 			return "failed"
-
+		time.sleep(4)
 		try:
+			element = driver.find_element_by_xpath('//*[@id="mat-option-0"]/span')
+			element.click()
+			print("\ti.1. Setting SuT to None Succeeded")
+		except:
+			print("\tERROR: Setting SuT to None Failed")
+			return "failed"
+		time.sleep(4)
+		try:
+			element = driver.find_element_by_xpath('//*[@id="editorInnerContainer0"]/div/div[1]/textarea	')
 			element.send_keys("python fteaching-tjob.py example")
 			print("\tj. ESS Test TJob Commands Set")
 		except:
 			print("\tERROR:: ESS Test TJob Commands Setting failed")
 			return "failed"
-
+		time.sleep(4)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="serviceESS"]/label/div')
+			time.sleep(10)
+			element = driver.find_element_by_xpath('//*[@id="serviceESS"]/label/div')
 			element.click()
 			print("\tk. Set ESS as TSS for the Test Tjob")
-		except:
-			print("\tERROR:: Setting ESS as TSS for the Test Tjob failed")
+		except Exception as e:
+			print("\tERROR:: Setting ESS as TSS for the Test Tjob failed because "+ str(e))
 			return "failed"
+		time.sleep(4)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="serviceEUS"]/label/div')
+			element = driver.find_element_by_xpath('//*[@id="serviceEUS"]/label/div')
 			element.click()
 			print("\tl. Set EUS as TSS for the Test Tjob")
 		except:
 			print("\tERROR:: Setting EUS as TSS for the Test Tjob failed")
 			return "failed"
+		time.sleep(4)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/etm-tjob-form/mat-card/mat-card-actions/button[1]/span')
+			element = driver.find_element_by_xpath('//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/etm-tjob-form/mat-card/mat-card-actions/button[1]')
 			element.click()
 			print("\tm. Saved the Test Tjob")
 		except:
-			print("\tERROR:: Attempt to Saved the Test Tjob failed")
+			print("\tERROR:: Attempt to Save the Test Tjob failed")
 			return "failed"
 		time.sleep(4)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="tJobs"]/div/table/tbody/tr/td[8]/div/div/button[1]/span/mat-icon')
+			element = driver.find_element_by_xpath('//*[@id="tJobs"]/div/table/tbody/tr/td[9]/div/div/div[1]/button[1]/span/mat-icon')
 			element.click()
 			print("\tn. Launched the Test Tjob")
 		except:
@@ -202,7 +224,7 @@ def test_create_exec_tjob(tormurl,driver):
 			return "failed"
 		time.sleep(4)
 		try:
-			element = driver.find_element(By.ID, 'resultMsgText')
+			element = driver.find_element_by_id('resultMsgText')
 			printed=True
 			while(element.text!="Executing Test" or element.text!="Failed" or element.text!="Finish"):
 				if(printed==True):
@@ -212,16 +234,17 @@ def test_create_exec_tjob(tormurl,driver):
 					continue
 		except:
 			print("\tp. TJob Execution must have finished")
-		time.sleep(4)
+		time.sleep(12)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/etm-tjob-exec-view/etm-tjob-exec-manager/div[1]/div/mat-card/mat-card-title/div/a/span[2]')
+			element = driver.find_element_by_partial_link_text('ESS Demo TJob')
 			element.click()
 			print("\tq. Selecting Finished TJob succeeded")
 		except:
 			print("\tERROR: Selecting TJob failed")
 			return "failed"
+		time.sleep(4)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/etm-tjob-manager/auto-height-grid/normal-height-row/div/mat-card/mat-card-content/div/span[5]/div/button[3]/span/mat-icon')
+			element = driver.find_element_by_xpath('//*[@id="menusideLeft"]/mat-sidenav-container/mat-sidenav-content/div/div/etm-tjob-manager/auto-height-grid/normal-height-row/div/mat-card/mat-card-content/div/span[6]/div/button[3]/span/mat-icon')
 			element.click()
 			print("\tr. Clicking Delete Button of Finished TJob Succeeded")
 		except:
@@ -229,15 +252,20 @@ def test_create_exec_tjob(tormurl,driver):
 			return "failed"
 		time.sleep(10)
 		try:
-			element = driver.find_element(By.XPATH, '//*[@id="mat-dialog-0"]/td-confirm-dialog/td-dialog/div/div[2]/td-dialog-actions/button[2]/span')
+			element = driver.find_element_by_xpath('//*[@id="mat-dialog-0"]/td-confirm-dialog/td-dialog/div/div[2]/td-dialog-actions/button[2]/span')
 			element.click()
 			print("\ts. Clicking Delete Confirmation Button Succeeded")
 		except:
 			print("\tERROR: Clicking Delete Confirmation Button Failed")
 			print("Unexpected ignorable error:", sys.exc_info()[0])
-
 		time.sleep(10)
 		return "success"
 
 if __name__=="__main__":
+	now = datetime.now()
+	print("Start Test Time =", now)
+	print("E2E tests are starting soon..")
 	e2etests()
+	# datetime object containing current date and time
+	now = datetime.now()
+	print("End Test Time =", now)
