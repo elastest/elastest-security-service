@@ -268,8 +268,5 @@ if __name__=="__main__":
 	e2etests()
 	# datetime object containing current date and time
 	now = datetime.now()
-<<<<<<< HEAD
 	print("End Test Time =", now)
-=======
-	print("End Test Time =", now)
->>>>>>> a8f9d9df3bbb9a48a2359f7c3ab7edd06dbf0747
+
