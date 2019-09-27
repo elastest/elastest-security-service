@@ -99,7 +99,7 @@ def get_tjob_stat():
 def get_ess_stat():
         global ess_finished
         current_time = datetime.datetime.now()
-        time_10_min_after_ess_scan = time_at_scan +  datetime.timedelta(seconds = 1)
+        time_10_min_after_ess_scan = time_at_scan +  datetime.timedelta(minutes = 5)
         if ess_finished==1:
             return jsonify({'status': "finished"})
         elif (current_time >= time_10_min_after_ess_scan):
