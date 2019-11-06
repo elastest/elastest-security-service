@@ -18,15 +18,12 @@ ARG VERSION=unspecified
 LABEL version=$VERSION
 
 USER root
-# Install any needed packages specified in requirements.txt
+# Install the following Python packages
 RUN pip install flask
-
-# Install any needed packages specified in requirements.txt
 RUN pip install flask-httpauth
 RUN pip install coverage
-
-# Install any needed packages specified in requirements.txt
 RUN pip install requests
+RUN pip install xlrd
 
 # Make port 80 available to the world outside this container
 EXPOSE 80

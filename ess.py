@@ -16,6 +16,7 @@ import requests
 import json
 from requests.exceptions import ProxyError
 import datetime
+from attack_page_getter import COSIAttackFinder
 
 torm_api="etm:8091" #TORM API URL in production mode
 #torm_api="localhost:37000" #TORM API URL in dev mode
@@ -32,6 +33,15 @@ scans=[] #setting empty secjobs list when api starts
 sites_to_be_scanned=[]
 time_at_scan = None
 time_after_10_min = None
+states = []
+state_req_res_info = []
+noisy_url_domains = ["https://tracking-protection.cdn.mozilla.net", "https://www.google.com", "https://fonts.gstatic.com", "https://www.gstatic.com", "https://fonts.googleapis.com"]
+url_state_map = {}
+url_occurance_count_map = {}
+not_visited_url_state_map = {}
+all_urls = []
+browser = "chrome"
+browser_version = "78.0"
 
 #To be used while implementing HTTPBasicAuth
 @auth.get_password
@@ -80,7 +90,7 @@ def load_gui():
 @app.route('/health/', methods = ['GET'])
 def get_health():
 	try:
-		urls = zap.core.urls
+		urls = zap.core.urls()
 		return jsonify( {'status': "up", "context": {"message":"ZAP is Ready"}})
 	except ProxyError:
 		return jsonify( {'status': "down", "context": {"message":"ZAP is not Ready"}})
@@ -107,7 +117,7 @@ def get_ess_stat():
         else:
             return jsonify({'status': "not-yet"})
 
-#To be used while implementing HTTPBasicAuth
+#To start ZAP active scan
 @app.route('/ess/scan/start/', methods = ['POST'])
 def start_scan():
     if "site" in request.json.keys() and request.json['site']!="":
@@ -377,10 +387,188 @@ def get_scan_report():
 def isZapReady():
 	zap=ZAPv2()
 	try:
-		urls=zap.core.urls
+		urls=zap.core.urls()
 		return "Ready"
 	except ProxyError:
 		return "NotReady"
+
+def is_present_in_diclst(key,value,list):
+    for dic in list:
+        if key in dic.keys():
+            if dic[key] == value:
+                return True
+    return False
+
+#Function to start state script execution
+@app.route('/ess/api/'+api_version+'/startstate/', methods = ['POST'])
+def start_state_script():
+    global states
+    if request.json['statename'] not in states:
+        states.append(request.json['statename'])
+    zap.core.new_session()
+    return jsonify({'status': "State script starting noted"})
+
+#Function to note end of state script execution
+@app.route('/ess/api/'+api_version+'/finishstate/', methods = ['POST'])
+def finish_state_script():
+    global state_req_res_info
+    all_tjob_messages = zap.core.messages()
+    for message in all_tjob_messages:
+     if message["type"] != "0":
+    	entry={"url":"", "request_header":"", "response_header":"", "response_body":"", "request_body":"", "state":""}
+    	entry["url"] = message["requestHeader"].split()[1]
+        all_urls.append(entry["url"])
+        entry["state"] = request.json['statename']
+        entry["request_header"] = message["requestHeader"]
+        entry["response_header"] = message["responseHeader"]
+        entry["response_body"] = message["responseBody"]
+        if message["requestHeader"].split()[0].startswith("P"):
+            entry["request_body"] = message["requestBody"]
+        state_req_res_info.append(entry)
+    make_url_map()
+    return jsonify({'status': "State script finish noted"})
+
+#Function to make a map of URLs and associated states
+def make_url_map():
+    global url_state_map
+    for entry in state_req_res_info:
+        if entry["url"] not in list(url_state_map.keys()):
+            url_state_map[entry["url"]] = [entry["state"]]
+        elif entry["state"] not in url_state_map[entry["url"]]:
+            url_state_map[entry["url"]].append(entry["state"])
+
+#Function to make a map of URLs and associated states
+def make_not_visited_url_map():
+    global not_visited_url_state_map
+    for url in list(url_state_map.keys()):
+        not_visited_url_state_map[url] = list(set(states) - set(url_state_map[url]))
+
+#Function to note end of state script execution
+@app.route('/ess/api/'+api_version+'/startprivacycheck/', methods = ['POST'])
+def start_privacy_check():
+    make_not_visited_url_map()
+    global browser
+    global browser_version
+    browser = request.json['browser']
+    browser_version = request.json['browser_version']
+    return jsonify({'status': "Start Privacy Check", "not_visited_url_state_map":not_visited_url_state_map})
+#End code for privacy check functionality
+
+def get_header_value(header_to_find, headers_list):
+    for header_value in headers_list:
+        if header_value.startswith(header_to_find):
+            return header_value.lstrip(header_to_find+":")
+    return "Not Found"
+#Send end privacy check notification
+@app.route('/ess/api/'+api_version+'/endprivacycheck/', methods = ['GET'])
+def end_privacy_check():
+    state_table = {}
+    urls_worth_considering = []
+    make_url_map()
+    for key in list(url_state_map.keys()):
+        if len(url_state_map[key]) > 1:
+            state_table[key] = []
+            for entry in state_req_res_info:
+                if entry["url"] == key:
+                    state_info = {"state":entry["state"],
+                    "response_code":entry["response_header"].split(" ")[1][0:3],
+                    "response_headers":entry["response_header"].strip("\r\n\r\n").split("\r\n")[1:],
+                    "response_header_x_content_type_options": get_header_value("X-Content-Type-Options", entry["response_header"].strip("\r\n\r\n").split("\r\n")[1:]),
+                    "response_header_content_type":get_header_value("Content-Type", entry["response_header"].strip("\r\n\r\n").split("\r\n")[1:]),
+                    "response_header_x_frame_options": get_header_value("X-Frame-Options", entry["response_header"].strip("\r\n\r\n").split("\r\n")[1:]),
+                    "response_header_content_disposition":get_header_value("Content-Disposition", entry["response_header"].strip("\r\n\r\n").split("\r\n")[1:])
+                    }
+                    state_table[key].append(state_info)
+    atkFinder = COSIAttackFinder()
+    #pprint(atkFinder.get_attack_inclusion("200", "enabled", "application/pdf", "disabled", "inline",
+    #                                      "302", "enabled", "text/html", "disabled", "disabled",
+    #                                      "chrome", "60.0"))
+    for key in list(state_table.keys()):
+        print("-===URL: "+key+"===-")
+        state_a_res_code = ""
+        state_a_cto = ""
+        state_a_ctype = ""
+        state_a_xfo = ""
+        state_a_cd = ""
+        state_a_headers = ""
+
+        state_b_res_code = ""
+        state_b_cto = ""
+        state_b_ctype = ""
+        state_b_xfo = ""
+        state_b_cd = ""
+        state_b_headers = ""
+        for entry in state_table[key]:
+            if entry["state"] == states[0]:
+                state_a_res_code = entry["response_code"].strip()
+                state_a_cto = entry["response_header_x_content_type_options"].strip()
+                state_a_ctype = entry["response_header_content_type"].strip().split(";")[0]
+                state_a_xfo = entry["response_header_x_frame_options"].strip()
+                state_a_cd = entry["response_header_content_disposition"].strip().split(";")[0]
+                state_a_headers = entry["response_headers"]
+            if entry["state"] == states[1]:
+                state_b_res_code = entry["response_code"].strip()
+                state_b_cto = entry["response_header_x_content_type_options"].strip()
+                state_b_ctype = entry["response_header_content_type"].strip().split(";")[0]
+                state_b_xfo = entry["response_header_x_frame_options"].strip()
+                state_b_cd = entry["response_header_content_disposition"].strip().split(";")[0]
+                state_b_headers = entry["response_headers"]
+
+        if state_a_cto == "Not Found":
+            state_a_cto = "disabled"
+        else:
+            state_a_cto = "enabled"
+
+        if state_a_ctype == "Not Found":
+            state_a_ctype = ""
+
+        if state_a_xfo == "Not Found":
+            state_a_xfo = "disabled"
+        else:
+            state_a_xfo = "enabled"
+
+        if state_a_cd == "Not Found":
+            state_a_cd = ""
+
+        if state_b_cto == "Not Found":
+            state_b_cto = "disabled"
+        else:
+            state_b_cto = "enabled"
+
+        if state_b_ctype == "Not Found":
+            state_b_ctype = ""
+
+        if state_b_xfo == "Not Found":
+            state_b_xfo = "disabled"
+        else:
+            state_b_xfo = "enabled"
+
+        if state_b_cd == "Not Found":
+            state_b_cd = ""
+
+        print("-==State A info==-")
+        print("state_a_res_code: "+state_a_res_code)
+        print("state_a_cto: "+state_a_cto)
+        print("state_a_ctype: "+state_a_ctype)
+        print("state_a_xfo: "+state_a_xfo)
+        print("state_a_cd: "+state_a_cd)
+        print("state_a_headers: "+ str(state_a_headers))
+        print("-==State B info==-")
+        print("state_b_res_code: "+state_b_res_code)
+        print("state_b_cto: "+state_b_cto)
+        print("state_b_ctype: "+state_b_ctype)
+        print("state_b_xfo: "+state_b_xfo)
+        print("state_b_cd: "+state_b_cd)
+        print("state_b_headers: "+ str(state_b_headers))
+        pprint(atkFinder.get_attack_inclusion(state_a_res_code, state_a_cto, state_a_ctype, state_a_xfo, state_a_cd,
+                                 state_b_res_code, state_b_cto, state_b_ctype, state_b_xfo, state_b_cd,
+                                 browser, browser_version))
+        print("---------------------")
+        print("")
+
+    return jsonify(atkFinder.get_attack_inclusion("200", "enabled", "application/pdf", "disabled", "inline",
+                                          "302", "enabled", "text/html", "disabled", "disabled",
+                                          "chrome", "60.0"))
 
 if __name__ == '__main__':
 	sleeps=[10,10,10,10,10]
