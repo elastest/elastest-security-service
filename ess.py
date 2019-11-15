@@ -414,17 +414,17 @@ def finish_state_script():
     global state_req_res_info
     all_tjob_messages = zap.core.messages()
     for message in all_tjob_messages:
-     if message["type"] != "0":
-    	entry={"url":"", "request_header":"", "response_header":"", "response_body":"", "request_body":"", "state":""}
-    	entry["url"] = message["requestHeader"].split()[1]
-        all_urls.append(entry["url"])
-        entry["state"] = request.json['statename']
-        entry["request_header"] = message["requestHeader"]
-        entry["response_header"] = message["responseHeader"]
-        entry["response_body"] = message["responseBody"]
-        if message["requestHeader"].split()[0].startswith("P"):
-            entry["request_body"] = message["requestBody"]
-        state_req_res_info.append(entry)
+        if message["type"] != "0":
+        	entry={"url":"", "request_header":"", "response_header":"", "response_body":"", "request_body":"", "state":""}
+        	entry["url"] = message["requestHeader"].split()[1]
+        	all_urls.append(entry["url"])
+        	entry["state"] = request.json['statename']
+        	entry["request_header"] = message["requestHeader"]
+        	entry["response_header"] = message["responseHeader"]
+        	entry["response_body"] = message["responseBody"]
+        	if message["requestHeader"].split()[0].startswith("P"):
+        	    entry["request_body"] = message["requestBody"]
+        	state_req_res_info.append(entry)
     make_url_map()
     return jsonify({'status': "State script finish noted"})
 
