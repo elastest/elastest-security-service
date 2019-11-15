@@ -24,6 +24,7 @@ RUN pip install flask-httpauth
 RUN pip install coverage
 RUN pip install requests
 RUN pip install xlrd
+RUN pip install codecov
 
 # Make port 80 available to the world outside this container
 EXPOSE 80
