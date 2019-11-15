@@ -6,7 +6,7 @@ node('docker') {
         mycontainer.inside("-u jenkins -v /var/run/docker.sock:/var/run/docker.sock:rw") {
             git 'https://github.com/elastest/elastest-security-service'
 
-	     
+
             stage "Build image - Package"
                 echo ("Building")
 		sh 'docker build --build-arg GIT_COMMIT=$(git rev-parse HEAD) --build-arg COMMIT_DATE=$(git log -1 --format=%cd --date=format:%Y-%m-%dT%H:%M:%S) . -t elastest/ess'
@@ -25,10 +25,10 @@ node('docker') {
 
 	    stage "Cobertura"
                 def codecovArgs = "-v -t $COB_ESS_TOKEN"
-                echo "$codecovArgs"                
+                echo "$codecovArgs"
                 def exitCode = sh(
                     returnStatus: true,
-                    script: "curl -s https://codecov.io/bash | bash -s - $codecovArgs")
+                    script: "coverage run test_ess.py && curl -s https://codecov.io/bash | bash -s - $codecovArgs")
                     if (exitCode != 0) {
                         echo( exitCode +': Failed to upload code coverage to codecov')
                     }
