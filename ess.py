@@ -129,9 +129,13 @@ def start_scan():
 
 #Function containing all sec report generation logic
 def write_report_to_path(report_unsorted, new_path):
-    report_unsorted = zap.core.alerts()
+    #report_unsorted = zap.core.alerts()
     report = []
+    pprint(type(report_unsorted))
+    report_unsorted = json.loads(report_unsorted)
     for entry in report_unsorted:
+	print("Entry")
+	pprint(entry)
         if entry["risk"] == "High":
             report.append(entry)
     for entry in report_unsorted:
@@ -189,8 +193,15 @@ def write_report_to_path(report_unsorted, new_path):
             collapsible_begin = "<ul class=\"collapsible\">"
             each_alert_entry = ""
             for key in list(alert.keys()):
-                if len(str(alert[key])) != 0:
-                    each_alert_entry += "<p>" + "<b>" + str(key) + ": " + "</b>" + str(alert[key]) + "</p></br>"
+		print(key)
+		print(alert[key])
+		print(type(key))
+		print(type(alert[key]))
+                if alert[key] != "":
+		    if key != "cosi_attacks":
+                    	each_alert_entry += "<p>" + "<b>" + str(key) + ": " + "</b>" + str(alert[key]) + "</p></br>"
+		    elif key == "cosi_attacks":
+			each_alert_entry += "<p>" + "<b>" + str(key) + ": " + "</b><textarea disabled>" + str(alert[key]) + "</textarea></p></br>"
             each_alert += """
                 <li>
                 <div class="collapsible-header"><i class="material-icons """+color+"""\">lens</i>Alert """+str(count)+"""</div>
@@ -202,7 +213,7 @@ def write_report_to_path(report_unsorted, new_path):
         site_name_end =     """
             </li>
         """
-        reports += site_name_begin + alerts_begin + collapsible_begin + each_alert + collapsible_end + alerts_end + site_name_end
+        reports += site_name_begin.encode('utf-8') + alerts_begin.encode('utf-8') + collapsible_begin.encode('utf-8') + each_alert.encode('utf-8') + collapsible_end.encode('utf-8') + alerts_end.encode('utf-8') + site_name_end.encode('utf-8')
     end = """
     </ul>
     </div>
@@ -465,6 +476,7 @@ def end_privacy_check():
     state_table = {}
     urls_worth_considering = []
     make_url_map()
+    cosi_report = []
     for key in list(url_state_map.keys()):
         if len(url_state_map[key]) > 1:
             state_table[key] = []
@@ -484,7 +496,7 @@ def end_privacy_check():
     #                                      "302", "enabled", "text/html", "disabled", "disabled",
     #                                      "chrome", "60.0"))
     for key in list(state_table.keys()):
-        print("-===URL: "+key+"===-")
+        print("-===URL: "+key+" ===-")
         state_a_res_code = ""
         state_a_cto = ""
         state_a_ctype = ""
@@ -545,27 +557,50 @@ def end_privacy_check():
 
         if state_b_cd == "Not Found":
             state_b_cd = ""
-
+	
+	cosi_report_entry = {}
+	cosi_report_entry["url"] = key
+	cosi_report_entry["state_a"] = states[0]
+	cosi_report_entry["state_b"] = states[1]
         print("-==State A info==-")
         print("state_a_res_code: "+state_a_res_code)
+	cosi_report_entry["state_a_res_code"] = state_a_res_code
         print("state_a_cto: "+state_a_cto)
         print("state_a_ctype: "+state_a_ctype)
         print("state_a_xfo: "+state_a_xfo)
         print("state_a_cd: "+state_a_cd)
         print("state_a_headers: "+ str(state_a_headers))
+	cosi_report_entry["state_a_headers"] = state_a_headers
         print("-==State B info==-")
         print("state_b_res_code: "+state_b_res_code)
+	cosi_report_entry["state_b_res_code"] = state_b_res_code
         print("state_b_cto: "+state_b_cto)
         print("state_b_ctype: "+state_b_ctype)
         print("state_b_xfo: "+state_b_xfo)
         print("state_b_cd: "+state_b_cd)
         print("state_b_headers: "+ str(state_b_headers))
-        pprint(atkFinder.get_attack_inclusion(state_a_res_code, state_a_cto, state_a_ctype, state_a_xfo, state_a_cd,
+	cosi_report_entry["state_b_headers"] = state_b_headers
+        cosi_attacks = atkFinder.get_attack_inclusion(state_a_res_code, state_a_cto, state_a_ctype, state_a_xfo, state_a_cd,
                                  state_b_res_code, state_b_cto, state_b_ctype, state_b_xfo, state_b_cd,
-                                 browser, browser_version))
+                                 browser, browser_version)
+	cosi_report_entry["cosi_attacks"] = cosi_attacks
+	cosi_report_entry["risk"] = "Medium"
+	if len(cosi_attacks) != 0:
+		cosi_report.append(cosi_report_entry)		
         print("---------------------")
         print("")
-
+    pprint(json.dumps(cosi_report))
+    #Start report storing
+    report_path=os.environ['ET_FILES_PATH']
+    #report_path="/home/wolverine/elastest-security-service/"
+    dirname = os.path.dirname(report_path+"cosi-report.json")
+    if not os.path.exists(dirname):
+	os.makedirs(dirname)
+	print("Had to make directory")
+    else:
+	write_report_to_path(json.dumps(cosi_report), report_path+"cosi-report.html")
+	print("COSI Scan Report has been written to the file "+report_path+"cosi-report.html")
+    #End report storing
     return jsonify(atkFinder.get_attack_inclusion("200", "enabled", "application/pdf", "disabled", "inline",
                                           "302", "enabled", "text/html", "disabled", "disabled",
                                           "chrome", "60.0"))
