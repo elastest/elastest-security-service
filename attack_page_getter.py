@@ -155,12 +155,12 @@ class COSIAttackFinder(object):
                 
             elif attack_vector == "appcache" and browser in ["chrome", "opera"]:
                 if state_a_res_code.startswith("2") and (state_b_res_code.startswith("3") or state_b_res_code.startswith("4") or state_b_res_code.startswith("5")):
-                    cosi_attacks.append({"inclusion" : "<link rel=\"prefetch\" href=\"INCLUDED_URL\">",
+                    cosi_attacks.append({"inclusion" : "<link rel=\"prefetch\" href=\"SD_URL\">",
                                                 "method" : "appcache",
                                                 "state_a_events" : [],
                                                 "state_b_events" : ["error"]})
                 elif state_b_res_code.startswith("2") and (state_a_res_code.startswith("3") or state_a_res_code.startswith("4") or state_a_res_code.startswith("5")):
-                    cosi_attacks.append({"inclusion" : "<link rel=\"prefetch\" href=\"INCLUDED_URL\">",
+                    cosi_attacks.append({"inclusion" : "<link rel=\"prefetch\" href=\"SD_URL\">",
                                                 "method" : "appcache",
                                                 "state_a_events" : ["error"],
                                                 "state_b_events" : []})
