@@ -592,14 +592,10 @@ def end_privacy_check():
     pprint(json.dumps(cosi_report))
     #Start report storing
     report_path=os.environ['ET_FILES_PATH']
+    print("Report file path is :"+report_path)
     #report_path="/home/wolverine/elastest-security-service/"
-    dirname = os.path.dirname(report_path+"cosi-report.json")
-    if not os.path.exists(dirname):
-	os.makedirs(dirname)
-	print("Had to make directory")
-    else:
-	write_report_to_path(json.dumps(cosi_report), report_path+"cosi-report.html")
-	print("COSI Scan Report has been written to the file "+report_path+"cosi-report.html")
+    write_report_to_path(json.dumps(cosi_report), report_path+"cosi-report.html")
+    print("COSI Scan Report has been written to the file "+report_path+"cosi-report.html")
     #End report storing
     return jsonify(atkFinder.get_attack_inclusion("200", "enabled", "application/pdf", "disabled", "inline",
                                           "302", "enabled", "text/html", "disabled", "disabled",
