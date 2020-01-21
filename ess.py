@@ -128,7 +128,7 @@ def start_scan():
             return jsonify({'status': "ZAP Exception"})
 
 #Function containing all sec report generation logic
-def write_report_to_path(report_unsorted, new_path):
+def write_report_to_path(report_unsorted, new_path, fname):
     #report_unsorted = zap.core.alerts()
     report = []
     pprint(type(report_unsorted))
@@ -231,9 +231,12 @@ def write_report_to_path(report_unsorted, new_path):
     </body>
     </html>
     """
-    new_days = open(new_path,'w')
-    new_days.write(part_1+reports+end+part_2)
-    new_days.close()
+
+    if not os.path.exists(new_path):
+	os.makedirs(new_path)
+
+    with open(os.path.join(new_path, fname), 'wb') as temp_file:
+    	temp_file.write(part_1+reports+end+part_2)
 
 #Function containing all cookie security logic
 def get_cookie_sec_report():
@@ -309,18 +312,11 @@ def stop_ess():
     ess_finished=1
     report=zap.core.alerts()
     report_path=os.environ['ET_FILES_PATH']
-    dirname = os.path.dirname(report_path+"report.json")
-    if not os.path.exists(dirname):
-    	os.makedirs(dirname)
-    	print("Had to make directory")
-    else:
-        write_report_to_path(json.dumps(report), report_path+"zap-report.html")
-        print("ZAP Scan Report has been written to the file "+report_path+"zap-report.html")
-        #with open(report_path+"cookie-report.json",'w') as f:
-        #  f.write(str(get_cookie_sec_report()))
+    write_report_to_path(json.dumps(report), report_path, "zap-report.html")
+    print("ZAP Scan Report has been written to the file "+report_path+"zap-report.html")
 
-        print("Cookie security report has been written to the file "+report_path+"cookie-report.json")
-
+    #write_report_to_path(json.dumps(report), report_path, "cookie-report.json")
+    #print("Cookie security report has been written to the file "+report_path+"cookie-report.json")
     return jsonify( { 'status': "stopped-ess" } )
 
 
@@ -592,9 +588,10 @@ def end_privacy_check():
     pprint(json.dumps(cosi_report))
     #Start report storing
     report_path=os.environ['ET_FILES_PATH']
-    print("Report file path is :"+report_path)
     #report_path="/home/wolverine/elastest-security-service/"
-    write_report_to_path(json.dumps(cosi_report), report_path+"cosi-report.html")
+
+    print("Report file path is :"+report_path)
+    write_report_to_path(json.dumps(cosi_report), report_path, "cosi-report.html")
     print("COSI Scan Report has been written to the file "+report_path+"cosi-report.html")
     #End report storing
     return jsonify(atkFinder.get_attack_inclusion("200", "enabled", "application/pdf", "disabled", "inline",
