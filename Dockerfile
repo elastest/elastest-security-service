@@ -1,5 +1,5 @@
 #From ZAP's docker image
-FROM owasp/zap2docker-stable
+FROM owasp/zap2docker-stable:2.8.0
 
 # Set the working directory to /app
 WORKDIR /app
