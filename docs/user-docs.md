@@ -6,10 +6,10 @@ The ElasTest Security Service (ESS) is an ElasTest service for identifying secur
 The current version of ESS (v0.5.0) has the following features.
 1. A web-based GUI for providing the details of the Web application under test
 2. Support for detecting [common Web application security weaknesses](https://www.owasp.org/index.php/Top_10-2017_Top_10)
-2. Supports the detection of insecure cookies that (1) can be stolen using [SSL Stripping attacks](https://paladion.net/ssl-stripping-revisiting-http-downgrading-attacks/), (2) can be stolen using [Cross-Site Scripting attacks](https://en.wikipedia.org/wiki/Cross-site_scripting), (3) facilitates [Cross-Site Request Forgery attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery)
+2. Supports the detection of insecure cookies that can be stolen using [SSL Stripping attacks](https://paladion.net/ssl-stripping-revisiting-http-downgrading-attacks/) and [Cross-Site Scripting attacks](https://en.wikipedia.org/wiki/Cross-site_scripting), and facilitates [Cross-Site Request Forgery attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery)
 
 The future releases of ESS will support the detection of:
-1. Vulnerabilities enabling cross-site sctipt inclusion attacks
+1. Vulnerabilities enabling cross-origin state inference attacks
 2. Vulnerabilities enabling replay attacks
 
 ## How to launch ESS
