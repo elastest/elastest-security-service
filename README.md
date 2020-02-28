@@ -14,8 +14,9 @@ The ElasTest Security Service (ESS) can be used to detect security vulnerabiliti
 1. Common web application vulnerabiilities such as XSS
 2. Vulnerabilities that are not very well supported by currently available pentest tools
 
-
 The documentation for using the component is available [here](https://github.com/elastest/elastest-security-service/blob/master/docs/user-docs.md).
+
+For accessing Basta-COSI, please refer to https://gitlab.software.imdea.org/avinash.sudhodanan/cosi-test/tree/develop
 
 What is ElasTest
 -----------------
